@@ -23,31 +23,37 @@ export function Navbar() {
           </Link>
 
           <Link
-            href="/finance"
+            href="/dashboard"
             className="text-sm font-medium text-foreground hover:text-primary transition"
           >
-            Finance
+            Dashboard
           </Link>
 
           <Link
-            href="/expenses"
+            href="/inventory"
             className="text-sm font-medium text-foreground hover:text-primary transition"
           >
-            Expenses
+            Inventory
           </Link>
 
           <Link
-            href="/investments"
+            href="/menu_optimization"
             className="text-sm font-medium text-foreground hover:text-primary transition"
           >
-            Investments
+            Menu Optimization
           </Link>
 
           <Link
-            href="/about"
+            href="/reports_analysis"
             className="text-sm font-medium text-foreground hover:text-primary transition"
           >
-            About
+            Reports and Analysis
+          </Link>
+          <Link
+            href="/waste_tracking"
+            className="text-sm font-medium text-foreground hover:text-primary transition"
+          >
+           Waste Tracking
           </Link>
         </nav>
 
