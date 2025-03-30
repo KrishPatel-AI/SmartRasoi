@@ -56,18 +56,11 @@ AI-Powered Smart Kitchen & Waste Minimizer for Restaurants.
     ```bash
     npm install
     ```
-. Run the Next.js app:
-    ```bash
+3 Run the Next.js app:
+    ```
     npm run dev
     ```
-
----
-
-## Features
-- **Loss-to-Profit Visualization:** Track and display financial waste using charts.
-- **AI Insights:** Get actionable recommendations for reducing food waste.
-- **Operational Decision Support:** Optimize purchasing and inventory management.
-
+    
 ---
 
 ## Environment Variables
