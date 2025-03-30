@@ -3,14 +3,14 @@ from flask_cors import CORS
 import google.generativeai as genai
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins
 
 # Set your Gemini API Key
-GEN_AI_API_KEY = "AIzaSyArE3dgcIbny826F7yJ-udA9ZpejwQzGkA"
+GEN_AI_API_KEY = ""
 genai.configure(api_key=GEN_AI_API_KEY)
 
-@app.route("/generate_recipe", methods=["POST"])
-def generate_recipe():
+@app.route("/generate_title", methods=["POST"])
+def generate_title():
     try:
         data = request.get_json()
         ingredients = data.get("ingredients", "")
@@ -19,31 +19,17 @@ def generate_recipe():
             return jsonify({"error": "No ingredients provided"}), 400
 
         prompt = f"""
-        Generate a structured recipe using the following ingredients: {ingredients}.
-        Respond in this structured format:
-
-        **Recipe Title:** [Title]
-        
-        **Ingredients:**
-        - List of ingredients
-
-        **Equipment:**
-        - List of equipment needed (or say 'No special equipment needed' if none)
-
-        **Instructions:**
-        1. Step-by-step cooking instructions
-
-        **Unique Aspects:**
-        - Highlight the unique features of this recipe
+        Generate a recipe title using the following ingredients: {ingredients}.
+        Respond only with the recipe title.
         """
 
         model = genai.GenerativeModel("gemini-2.0-flash")
         response = model.generate_content(prompt)
 
         if response and response.text:
-            return jsonify({"recipe": response.text})
+            return jsonify({"title": response.text.strip()})
         else:
-            return jsonify({"error": "Failed to generate recipe"}), 500
+            return jsonify({"error": "Failed to generate recipe title"}), 500
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
