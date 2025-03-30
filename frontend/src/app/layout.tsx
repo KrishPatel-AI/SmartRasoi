@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Wealth Radar",
-  description: "Your Complete Wealth in your Radar",
+  title: "Smart Rasoi",
+  description: "Make your cooking easier with Smart Rasoi",
 };
 
 export default function RootLayout({

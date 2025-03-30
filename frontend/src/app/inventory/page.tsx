@@ -78,16 +78,18 @@ interface InventoryItem {
   quantity: number;
   unit: string;
   status: string;
+  amount: number;
   expiry_date: string | null;
   last_updated?: string;
 }
 
 const defaultItem = {
   name: "",
-  category: "vegetables",  // Set a default category
+  category: "vegetables", // Set a default category
   quantity: 1,
-  unit: "kg",  // Set a default unit
+  unit: "kg", // Set a default unit
   status: "optimal",
+  amount: 0, // Add default amount
   expiry_date: "",
 };
 
@@ -112,8 +114,8 @@ export default function InventoryPage() {
       const { data, error } = await supabase
         .from("inventory")
         .select("*")
-        .order('name', { ascending: true });
-      
+        .order("name", { ascending: true });
+
       if (error) {
         console.error("Error fetching inventory:", error);
         setError(`Failed to fetch inventory: ${error.message}`);
@@ -137,7 +139,7 @@ export default function InventoryPage() {
         setError("Item name is required");
         return;
       }
-      
+
       if (!newItem.category) {
         setError("Category is required");
         return;
@@ -148,6 +150,7 @@ export default function InventoryPage() {
         name: newItem.name,
         category: newItem.category,
         quantity: newItem.quantity,
+        amount: newItem.amount || 0, // Ensure amount has a default value
         unit: newItem.unit || "unit",
         status: newItem.status,
         expiry_date: newItem.expiry_date ? newItem.expiry_date : null,
@@ -157,7 +160,7 @@ export default function InventoryPage() {
       const { error: insertError } = await supabase
         .from("inventory")
         .insert([itemToAdd]);
-      
+
       if (insertError) {
         console.error("Error adding item:", insertError);
         setError(`Failed to add item: ${insertError.message}`);
@@ -176,14 +179,14 @@ export default function InventoryPage() {
   async function updateItem() {
     if (!editingItem) return;
     setError(null);
-    
+
     try {
       // Validate required fields
       if (!editingItem.name) {
         setError("Item name is required");
         return;
       }
-      
+
       if (!editingItem.category) {
         setError("Category is required");
         return;
@@ -194,6 +197,7 @@ export default function InventoryPage() {
         name: editingItem.name,
         category: editingItem.category,
         quantity: editingItem.quantity,
+        amount: editingItem.amount || 0, // Ensure amount has a default value
         unit: editingItem.unit || "unit",
         status: editingItem.status,
         expiry_date: editingItem.expiry_date ? editingItem.expiry_date : null,
@@ -204,7 +208,7 @@ export default function InventoryPage() {
         .from("inventory")
         .update(itemToUpdate)
         .eq("id", editingItem.id);
-      
+
       if (updateError) {
         console.error("Error updating item:", updateError);
         setError(`Failed to update item: ${updateError.message}`);
@@ -223,13 +227,13 @@ export default function InventoryPage() {
   async function deleteItem() {
     if (!itemToDelete) return;
     setError(null);
-    
+
     try {
       const { error: deleteError } = await supabase
         .from("inventory")
         .delete()
         .eq("id", itemToDelete);
-      
+
       if (deleteError) {
         console.error("Error deleting item:", deleteError);
         setError(`Failed to delete item: ${deleteError.message}`);
@@ -246,27 +250,30 @@ export default function InventoryPage() {
 
   // Filter items based on search query and category
   const filteredItems = inventoryItems.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        item.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
+    const matchesSearch =
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "all" || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   // Set up real-time subscription for inventory changes
   useEffect(() => {
     fetchInventory();
-    
+
     // Set up real-time subscription
     const channel = supabase
-      .channel('inventory-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'inventory' }, 
+      .channel("inventory-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "inventory" },
         () => {
           fetchInventory();
         }
       )
       .subscribe();
-    
+
     // Clean up the subscription when component unmounts
     return () => {
       supabase.removeChannel(channel);
@@ -278,7 +285,9 @@ export default function InventoryPage() {
     setEditingItem({
       ...item,
       // Convert the date format for the input field
-      expiry_date: item.expiry_date ? new Date(item.expiry_date).toISOString().split('T')[0] : "",
+      expiry_date: item.expiry_date
+        ? new Date(item.expiry_date).toISOString().split("T")[0]
+        : "",
     });
     setIsEditDialogOpen(true);
   }
@@ -301,7 +310,11 @@ export default function InventoryPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" className="h-9" onClick={() => setIsAddDialogOpen(true)}>
+          <Button
+            size="sm"
+            className="h-9"
+            onClick={() => setIsAddDialogOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add Item
           </Button>
@@ -309,7 +322,10 @@ export default function InventoryPage() {
       </div>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
           <strong className="font-bold">Error: </strong>
           <span className="block sm:inline">{error}</span>
         </div>
@@ -345,8 +361,8 @@ export default function InventoryPage() {
             <CardHeader className="p-4">
               <div className="flex items-center justify-between">
                 <CardTitle>Inventory Items</CardTitle>
-                <Select 
-                  value={selectedCategory} 
+                <Select
+                  value={selectedCategory}
                   onValueChange={setSelectedCategory}
                 >
                   <SelectTrigger className="w-[180px]">
@@ -355,10 +371,10 @@ export default function InventoryPage() {
                   <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
                     <SelectItem value="vegetables">Vegetables</SelectItem>
-                    <SelectItem value="meat">Meat</SelectItem>
+                    <SelectItem value="fruits">Fruits</SelectItem>
                     <SelectItem value="dairy">Dairy</SelectItem>
                     <SelectItem value="grains">Grains</SelectItem>
-                    <SelectItem value="seafood">Seafood</SelectItem>
+                    <SelectItem value="bakery">Bakery</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -383,30 +399,38 @@ export default function InventoryPage() {
                         </Button>
                       </TableHead>
                       <TableHead>Category</TableHead>
-                      <TableHead className="text-right">Quantity</TableHead>
+                      <TableHead>Quantity</TableHead>
                       <TableHead>Unit</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Amount</TableHead>
                       <TableHead>Expiry Date</TableHead>
                       <TableHead>Last Updated</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredItems.map((item) => (
                       <TableRow key={item.id}>
-                        <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {item.name}
+                        </TableCell>
                         <TableCell>{item.category}</TableCell>
-                        <TableCell className="text-right">{item.quantity}</TableCell>
+                        <TableCell>{item.quantity}</TableCell>
                         <TableCell>{item.unit}</TableCell>
                         <TableCell>{getStatusBadge(item.status)}</TableCell>
+                        <TableCell>{item.amount}</TableCell>
                         <TableCell>
-                          {item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : "N/A"}
+                          {item.expiry_date
+                            ? new Date(item.expiry_date).toLocaleDateString()
+                            : "N/A"}
                         </TableCell>
                         <TableCell>
-                          {item.last_updated ? new Date(item.last_updated).toLocaleDateString() : "N/A"}
+                          {item.last_updated
+                            ? new Date(item.last_updated).toLocaleDateString()
+                            : "N/A"}
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                        <TableCell>
+                          <div className="flex  gap-2">
                             <Button
                               variant="ghost"
                               size="icon"
@@ -442,7 +466,8 @@ export default function InventoryPage() {
                 <div className="flex justify-center items-center p-8">
                   <p>Loading low stock items...</p>
                 </div>
-              ) : inventoryItems.filter(item => item.status === "low").length === 0 ? (
+              ) : inventoryItems.filter((item) => item.status === "low")
+                  .length === 0 ? (
                 <div className="flex justify-center items-center p-8">
                   <p>No low stock items found.</p>
                 </div>
@@ -452,10 +477,11 @@ export default function InventoryPage() {
                     <TableRow>
                       <TableHead className="w-[200px]">Name</TableHead>
                       <TableHead>Category</TableHead>
-                      <TableHead className="text-right">Quantity</TableHead>
+                      <TableHead>Quantity</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Amount</TableHead>
                       <TableHead>Recommended</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -467,10 +493,11 @@ export default function InventoryPage() {
                             {item.name}
                           </TableCell>
                           <TableCell>{item.category}</TableCell>
-                          <TableCell className="text-right">
+                          <TableCell>
                             {item.quantity} {item.unit}
                           </TableCell>
                           <TableCell>{getStatusBadge(item.status)}</TableCell>
+                          <TableCell>{item.amount}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Progress
@@ -482,7 +509,7 @@ export default function InventoryPage() {
                               </span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell>
                             <Button size="sm">Reorder</Button>
                           </TableCell>
                         </TableRow>
@@ -504,7 +531,8 @@ export default function InventoryPage() {
                 <div className="flex justify-center items-center p-8">
                   <p>Loading expiring items...</p>
                 </div>
-              ) : inventoryItems.filter(item => item.status === "expiring").length === 0 ? (
+              ) : inventoryItems.filter((item) => item.status === "expiring")
+                  .length === 0 ? (
                 <div className="flex justify-center items-center p-8">
                   <p>No expiring items found.</p>
                 </div>
@@ -514,43 +542,54 @@ export default function InventoryPage() {
                     <TableRow>
                       <TableHead className="w-[200px]">Name</TableHead>
                       <TableHead>Category</TableHead>
-                      <TableHead className="text-right">Quantity</TableHead>
+                      <TableHead>Quantity</TableHead>
+                      <TableHead>Amount</TableHead>
                       <TableHead>Expiry Date</TableHead>
                       <TableHead>Days Left</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {inventoryItems
                       .filter((item) => item.status === "expiring")
                       .map((item) => {
-                        const expiryDate = item.expiry_date ? new Date(item.expiry_date) : null;
-                        const today = new Date();
-                        const daysLeft = expiryDate 
-                          ? Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) 
+                        const expiryDate = item.expiry_date
+                          ? new Date(item.expiry_date)
                           : null;
-                          
+                        const today = new Date();
+                        const daysLeft = expiryDate
+                          ? Math.ceil(
+                              (expiryDate.getTime() - today.getTime()) /
+                                (1000 * 60 * 60 * 24)
+                            )
+                          : null;
+
                         return (
                           <TableRow key={item.id}>
                             <TableCell className="font-medium">
                               {item.name}
                             </TableCell>
                             <TableCell>{item.category}</TableCell>
-                            <TableCell className="text-right">
+                            <TableCell>
                               {item.quantity} {item.unit}
                             </TableCell>
+                            <TableCell>{item.amount}</TableCell>
                             <TableCell>
-                              {expiryDate ? expiryDate.toLocaleDateString() : "N/A"}
+                              {expiryDate
+                                ? expiryDate.toLocaleDateString()
+                                : "N/A"}
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4 text-amber-500" />
                                 <span className="text-sm text-amber-500 font-medium">
-                                  {daysLeft !== null ? `${daysLeft} days` : "N/A"}
+                                  {daysLeft !== null
+                                    ? `${daysLeft} days`
+                                    : "N/A"}
                                 </span>
                               </div>
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell>
                               <Button variant="outline" size="sm">
                                 Recipe Ideas
                               </Button>
@@ -583,7 +622,9 @@ export default function InventoryPage() {
               <Input
                 id="name"
                 value={newItem.name}
-                onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, name: e.target.value })
+                }
                 className="col-span-3"
                 required
               />
@@ -594,17 +635,19 @@ export default function InventoryPage() {
               </Label>
               <Select
                 value={newItem.category}
-                onValueChange={(value) => setNewItem({ ...newItem, category: value })}
+                onValueChange={(value) =>
+                  setNewItem({ ...newItem, category: value })
+                }
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="vegetables">Vegetables</SelectItem>
-                  <SelectItem value="meat">Meat</SelectItem>
+                  <SelectItem value="fruit">Fruits</SelectItem>
                   <SelectItem value="dairy">Dairy</SelectItem>
                   <SelectItem value="grains">Grains</SelectItem>
-                  <SelectItem value="seafood">Seafood</SelectItem>
+                  <SelectItem value="bakery">Bakery</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -617,7 +660,12 @@ export default function InventoryPage() {
                 type="number"
                 min="0"
                 value={newItem.quantity}
-                onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 0 })}
+                onChange={(e) =>
+                  setNewItem({
+                    ...newItem,
+                    quantity: parseInt(e.target.value) || 0,
+                  })
+                }
                 className="col-span-3"
               />
             </div>
@@ -628,9 +676,29 @@ export default function InventoryPage() {
               <Input
                 id="unit"
                 value={newItem.unit}
-                onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, unit: e.target.value })
+                }
                 className="col-span-3"
                 placeholder="kg, g, l, ml, etc."
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="amount" className="text-right">
+                Amount
+              </Label>
+              <Input
+                id="amount"
+                type="number"
+                min="0"
+                value={newItem.amount}
+                onChange={(e) =>
+                  setNewItem({
+                    ...newItem,
+                    amount: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="col-span-3"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -639,7 +707,9 @@ export default function InventoryPage() {
               </Label>
               <Select
                 value={newItem.status}
-                onValueChange={(value) => setNewItem({ ...newItem, status: value })}
+                onValueChange={(value) =>
+                  setNewItem({ ...newItem, status: value })
+                }
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a status" />
@@ -659,16 +729,21 @@ export default function InventoryPage() {
                 id="expiry_date"
                 type="date"
                 value={newItem.expiry_date}
-                onChange={(e) => setNewItem({ ...newItem, expiry_date: e.target.value })}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, expiry_date: e.target.value })
+                }
                 className="col-span-3"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setIsAddDialogOpen(false);
-              setError(null);
-            }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAddDialogOpen(false);
+                setError(null);
+              }}
+            >
               Cancel
             </Button>
             <Button onClick={addItem}>Add Item</Button>
@@ -677,10 +752,13 @@ export default function InventoryPage() {
       </Dialog>
 
       {/* Edit Item Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
-        setIsEditDialogOpen(open);
-        if (!open) setError(null);
-      }}>
+      <Dialog
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) setError(null);
+        }}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Inventory Item</DialogTitle>
@@ -697,7 +775,9 @@ export default function InventoryPage() {
                 <Input
                   id="edit-name"
                   value={editingItem.name}
-                  onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
+                  onChange={(e) =>
+                    setEditingItem({ ...editingItem, name: e.target.value })
+                  }
                   className="col-span-3"
                   required
                 />
@@ -708,17 +788,19 @@ export default function InventoryPage() {
                 </Label>
                 <Select
                   value={editingItem.category}
-                  onValueChange={(value) => setEditingItem({ ...editingItem, category: value })}
+                  onValueChange={(value) =>
+                    setEditingItem({ ...editingItem, category: value })
+                  }
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="vegetables">Vegetables</SelectItem>
-                    <SelectItem value="meat">Meat</SelectItem>
+                    <SelectItem value="fruits">Fruits</SelectItem>
                     <SelectItem value="dairy">Dairy</SelectItem>
                     <SelectItem value="grains">Grains</SelectItem>
-                    <SelectItem value="seafood">Seafood</SelectItem>
+                    <SelectItem value="bakery">Bakery</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -731,7 +813,12 @@ export default function InventoryPage() {
                   type="number"
                   min="0"
                   value={editingItem.quantity}
-                  onChange={(e) => setEditingItem({ ...editingItem, quantity: parseInt(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    setEditingItem({
+                      ...editingItem,
+                      quantity: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="col-span-3"
                 />
               </div>
@@ -742,7 +829,27 @@ export default function InventoryPage() {
                 <Input
                   id="edit-unit"
                   value={editingItem.unit}
-                  onChange={(e) => setEditingItem({ ...editingItem, unit: e.target.value })}
+                  onChange={(e) =>
+                    setEditingItem({ ...editingItem, unit: e.target.value })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-amount" className="text-right">
+                  Amount
+                </Label>
+                <Input
+                  id="edit-amount"
+                  type="number"
+                  min="0"
+                  value={editingItem.amount}
+                  onChange={(e) =>
+                    setEditingItem({
+                      ...editingItem,
+                      amount: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="col-span-3"
                 />
               </div>
@@ -752,7 +859,9 @@ export default function InventoryPage() {
                 </Label>
                 <Select
                   value={editingItem.status}
-                  onValueChange={(value) => setEditingItem({ ...editingItem, status: value })}
+                  onValueChange={(value) =>
+                    setEditingItem({ ...editingItem, status: value })
+                  }
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select a status" />
@@ -772,17 +881,25 @@ export default function InventoryPage() {
                   id="edit-expiry_date"
                   type="date"
                   value={editingItem.expiry_date || ""}
-                  onChange={(e) => setEditingItem({ ...editingItem, expiry_date: e.target.value })}
+                  onChange={(e) =>
+                    setEditingItem({
+                      ...editingItem,
+                      expiry_date: e.target.value,
+                    })
+                  }
                   className="col-span-3"
                 />
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setIsEditDialogOpen(false);
-              setError(null);
-            }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditDialogOpen(false);
+                setError(null);
+              }}
+            >
               Cancel
             </Button>
             <Button onClick={updateItem}>Save Changes</Button>
@@ -791,22 +908,29 @@ export default function InventoryPage() {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={(open) => {
-        setIsDeleteDialogOpen(open);
-        if (!open) setError(null);
-      }}>
+      <Dialog
+        open={isDeleteDialogOpen}
+        onOpenChange={(open) => {
+          setIsDeleteDialogOpen(open);
+          if (!open) setError(null);
+        }}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Delete Inventory Item</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this item? This action cannot be undone.
+              Are you sure you want to delete this item? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setIsDeleteDialogOpen(false);
-              setError(null);
-            }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setError(null);
+              }}
+            >
               Cancel
             </Button>
             <Button variant="destructive" onClick={deleteItem}>
