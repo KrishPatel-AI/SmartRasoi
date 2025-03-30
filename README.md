@@ -5,49 +5,10 @@ AI-Powered Smart Kitchen & Waste Minimizer for Restaurants.
 
 ## Tech Stack
 - **Frontend:** Next.js, TypeScript, Tailwind CSS, ShadCN UI
-- **Backend:** FastAPI (Python)
-- **Database:** Supabase (PostgreSQL)
-- **AI Integration:** OpenAI / Hugging Face / Gemini (Optional)
-- **ORM:** Prisma
-
----
-
-## Folder Structure
-Here is the project structure for easy navigation:
-
-```
-SmartRasoi
-├── backend
-│   ├── fastapi_backend
-│   │   ├── __init__.py
-│   │   ├── main.py
-│   │   ├── models.py
-│   │   ├── routes.py
-│   │   ├── services.py
-│   │   ├── utils.py
-│   │   └── .env
-│   ├── prisma_client.py
-│   └── requirements.txt
-├── frontend
-│   ├── app
-│   │   ├── dashboard
-│   │   │   ├── loss-to-profit
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── components
-│   │   │   │       └── Chart.tsx
-│   │   └── layout.tsx
-│   ├── prisma
-│   │   ├── schema.prisma
-│   ├── public
-│   ├── components
-│   ├── styles
-│   ├── utils
-│   ├── .env
-│   ├── next.config.js
-│   ├── package.json
-│   └── tsconfig.json
-└── README.md
-```
+- **Backend:** nodejs, Express, Flask (Python), 
+- **Database:** Supabase (PostgreSQL) , mongodb, 
+-**AI (ML):** sk learn, pandas, Numpy, kaggle dataset,
+- **AI Integration:**  Gemini 
 
 ---
 
@@ -57,20 +18,33 @@ SmartRasoi
 - Node.js & npm
 - Python 3.10+
 - PostgreSQL (via Supabase)
-- Prisma CLI
 
-### Backend Setup (FastAPI)
+### Ai Setup
+1. Navigate to the ai folder:
+    ```bash
+    cd ai
+    ```
+2. Install dependencies:
+    ```bash
+    pip install
+    ```
+3. Start the Port
+    ```bash
+    python app.py
+    ```
+    
+### Backend Setup
 1. Navigate to the backend folder:
     ```bash
     cd backend
     ```
 2. Install dependencies:
     ```bash
-    pip install -r requirements.txt
+    npm install 
     ```
-3. Start the FastAPI server:
+3. Start the server:
     ```bash
-    uvicorn fastapi_backend.main:app --reload
+    node server.js 
     ```
 
 ### Frontend Setup (Next.js)
@@ -82,11 +56,7 @@ SmartRasoi
     ```bash
     npm install
     ```
-3. Generate Prisma client:
-    ```bash
-    npx prisma generate
-    ```
-4. Run the Next.js app:
+. Run the Next.js app:
     ```bash
     npm run dev
     ```
@@ -105,8 +75,18 @@ Create a `.env` file in both frontend and backend with the following variables:
 
 ### Backend (.env)
 ```
-DATABASE_URL=postgresql://<username>:<password>@<host>:5432/<database>
-OPENAI_API_KEY=your_openai_api_key
+# Server Configuration
+PORT=8080
+
+# MongoDB Connection (Replace with actual values)
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster-url>/?retryWrites=true&w=majority&appName=<app-name>
+
+# Flask API URL
+FLASK_API_URL=http://127.0.0.1:5000
+
+# PostgreSQL Database Connection (Replace with actual values)
+DATABASE_URL="postgresql://<db-username>:<db-password>@<db-host>:5432/<db-name>?sslmode=require"
+
 ```
 
 ### Frontend (.env)
@@ -124,10 +104,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ---
 
-## License
-This project is licensed under the MIT License.
-
----
 
 ## Contact
 For queries, reach out to the project maintainers via email or GitHub.
