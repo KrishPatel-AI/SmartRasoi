@@ -50,10 +50,10 @@ export function Navbar() {
             Reports and Analysis
           </Link>
           <Link
-            href="/waste_tracking"
+            href="/waste_prediction"
             className="text-sm font-medium text-foreground hover:text-primary transition"
           >
-           Waste Tracking
+           Waste Prediction
           </Link>
         </nav>
 
