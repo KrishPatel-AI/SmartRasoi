@@ -6,7 +6,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Set your Gemini API Key
-GEN_AI_API_KEY = "AIzaSyCZbuJNAVHDXtx94pRdHSvZy7S2G1SoFOk"
+GEN_AI_API_KEY = "AIzaSyArE3dgcIbny826F7yJ-udA9ZpejwQzGkA"
 genai.configure(api_key=GEN_AI_API_KEY)
 
 @app.route("/generate_recipe", methods=["POST"])

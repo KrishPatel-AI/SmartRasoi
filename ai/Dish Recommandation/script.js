@@ -7,7 +7,8 @@ async function generateRecipe() {
     }
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/generate_recipe", {
+        // 🔄 Fetching from Express backend instead of Flask directly
+        const response = await fetch("http://localhost:8080/api/generate-recipe", { 
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ingredients })
