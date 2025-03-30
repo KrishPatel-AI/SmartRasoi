@@ -5,9 +5,9 @@ AI-Powered Smart Kitchen & Waste Minimizer for Restaurants.
 
 ## Tech Stack
 - **Frontend:** Next.js, TypeScript, Tailwind CSS, ShadCN UI
-- **Backend:** nodejs, Express, Flask (Python), 
-- **Database:** Supabase (PostgreSQL) , mongodb, 
--**AI (ML):** sk learn, pandas, Numpy, kaggle dataset,
+- **Backend:** Nodejs, Express, Flask (Python), 
+- **Database:** Supabase (PostgreSQL) , MongoDB, 
+-**AI (ML):** Sk Learn, Pandas, Numpy, Kaggle Dataset
 - **AI Integration:**  Gemini 
 
 ---
