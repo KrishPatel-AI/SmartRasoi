@@ -59,35 +59,7 @@ AI-Powered Smart Kitchen & Waste Minimizer for Restaurants.
 3 Run the Next.js app:
     ```
     npm run dev
-    ```
-    
----
-
-## Environment Variables
-Create a `.env` file in both frontend and backend with the following variables:
-
-### Backend (.env)
-```
-# Server Configuration
-PORT=8080
-
-# MongoDB Connection (Replace with actual values)
-MONGO_URI=mongodb+srv://<username>:<password>@<cluster-url>/?retryWrites=true&w=majority&appName=<app-name>
-
-# Flask API URL
-FLASK_API_URL=http://127.0.0.1:5000
-
-# PostgreSQL Database Connection (Replace with actual values)
-DATABASE_URL="postgresql://<db-username>:<db-password>@<db-host>:5432/<db-name>?sslmode=require"
-
-```
-
-### Frontend (.env)
-```
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-url.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-```
-
+    ```    
 ---
 
 ## Contribution Guidelines
