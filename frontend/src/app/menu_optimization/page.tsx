@@ -1,7 +1,15 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -10,16 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ArrowRight,
-  ChefHat,
-  DollarSign,
-  Filter,
-  Leaf,
-  Plus,
-  Sparkles,
-  Utensils,
-} from "lucide-react";
+import { ChefHat, DollarSign, Filter, Leaf, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -28,9 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Label } from "@/components/ui/label";
 
-// Sample menu optimization data
 const suggestedDishes = [
   {
     id: 1,
@@ -164,6 +161,88 @@ function getStatusBadge(status) {
 }
 
 export default function MenuOptimizationPage() {
+  const [inventory, setInventory] = useState<string[]>([]);
+  const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
+  const [recipe, setRecipe] = useState<any>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchInventory();
+  }, []);
+
+  const fetchInventory = async () => {
+    try {
+      const { data, error } = await supabase.from("inventory").select("name");
+      if (error) throw error;
+
+      // Merge duplicate ingredients (case-insensitive)
+      const uniqueIngredients = [
+        ...new Set(data.map((item: any) => item.name.toLowerCase())),
+      ];
+      setInventory(uniqueIngredients);
+    } catch (err: any) {
+      setError("❌ Failed to fetch inventory.");
+      console.error("Inventory Fetch Error:", err.message);
+    }
+  };
+
+  const toggleIngredient = (ingredient: string) => {
+    setSelectedIngredients((prev) =>
+      prev.includes(ingredient)
+        ? prev.filter((item) => item !== ingredient)
+        : [...prev, ingredient]
+    );
+  };
+
+  const generateRecipe = async () => {
+    if (selectedIngredients.length === 0) {
+      setError("⚠️ Please select ingredients!");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setRecipe(null);
+
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/generate-recipe",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ingredients: selectedIngredients.join(", ") }),
+        }
+      );
+
+      const data = await response.json();
+      if (data.error) {
+        setError("❌ Error: " + data.error);
+        return;
+      }
+
+      setRecipe(parseRecipe(data.recipe));
+    } catch (err) {
+      setError("❌ Failed to fetch recipe!");
+      console.error("Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const parseRecipe = (recipeText: string) => {
+    const extract = (regex: RegExp) =>
+      (recipeText.match(regex) || [null, ""])[1].trim();
+
+    return {
+      title: extract(/\*\*Recipe Title:\*\*([\s\S]*?)\n/),
+      ingredients:
+        extract(/\*\*Ingredients:\*\*([\s\S]*?)\n\*\*/)?.split("\n") || [],
+      instructions:
+        extract(/\*\*Instructions:\*\*([\s\S]*?)\n\*\*/)?.split("\n") || [],
+    };
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -396,7 +475,7 @@ export default function MenuOptimizationPage() {
         <TabsContent value="generator" className="mt-4 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>AI Dish Generator</CardTitle>
+              <CardTitle>AI Recipe Generator</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-6 lg:grid-cols-2">
               {/* Left Panel */}
@@ -404,106 +483,54 @@ export default function MenuOptimizationPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base">
-                      Generate New Dish
+                      Select Ingredients
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {[
-                      {
-                        label: "Recipe Type",
-                        options: [
-                          "Starter",
-                          "Main Course",
-                          "Dessert",
-                          "Beverage",
-                        ],
-                        default: "main",
-                      },
-                      {
-                        label: "Cuisine Style",
-                        options: [
-                          "Italian",
-                          "Asian",
-                          "Mediterranean",
-                          "American",
-                          "Fusion",
-                        ],
-                        default: "mediterranean",
-                      },
-                      {
-                        label: "Dietary Preferences",
-                        options: [
-                          "No Restrictions",
-                          "Vegetarian",
-                          "Vegan",
-                          "Gluten-Free",
-                          "Dairy-Free",
-                        ],
-                        default: "none",
-                      },
-                      {
-                        label: "Use Expiring Ingredients",
-                        options: [
-                          "Yes, prioritize expiring items",
-                          "No, use any ingredients",
-                        ],
-                        default: "yes",
-                      },
-                    ].map((item, index) => (
-                      <div key={index}>
-                        <Label className="text-sm">{item.label}</Label>
-                        <Select defaultValue={item.default}>
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={`Select ${item.label.toLowerCase()}`}
+                    <ScrollArea className="h-[200px] border rounded p-2">
+                      {inventory.length > 0 ? (
+                        inventory.map((ingredient, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-2 py-1"
+                          >
+                            <Checkbox
+                              id={ingredient}
+                              checked={selectedIngredients.includes(ingredient)}
+                              onCheckedChange={() =>
+                                toggleIngredient(ingredient)
+                              }
                             />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {item.options.map((option) => (
-                              <SelectItem
-                                key={option}
-                                value={option.toLowerCase()}
-                              >
-                                {option}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    ))}
-                    <Button className="w-full">
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Generate Dish
-                    </Button>
-                  </CardContent>
-                </Card>
+                            <label
+                              htmlFor={ingredient}
+                              className="cursor-pointer"
+                            >
+                              {ingredient.charAt(0).toUpperCase() +
+                                ingredient.slice(1)}
+                            </label>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-500">
+                          No ingredients available.
+                        </p>
+                      )}
+                    </ScrollArea>
 
-                {/* Expiring Ingredients */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">
-                      Expiring Ingredients
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {[
-                      { name: "Lettuce (5.2kg)", days: 2, color: "red" },
-                      { name: "Tomatoes (3.8kg)", days: 3, color: "amber" },
-                      { name: "Heavy Cream (2.5L)", days: 3, color: "amber" },
-                    ].map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-2 bg-muted rounded-md"
-                      >
-                        <span>{item.name}</span>
-                        <Badge
-                          variant="outline"
-                          className={`bg-${item.color}-500/10 text-${item.color}-500 border-${item.color}-500/20`}
-                        >
-                          {item.days} days left
-                        </Badge>
-                      </div>
-                    ))}
+                    <Textarea
+                      className="mt-2"
+                      placeholder="Selected ingredients will appear here..."
+                      value={selectedIngredients.join(", ")}
+                      readOnly
+                    />
+
+                    <Button
+                      className="w-full"
+                      onClick={generateRecipe}
+                      disabled={loading}
+                    >
+                      {loading ? "Generating..." : "Generate Recipe"}
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
@@ -512,94 +539,70 @@ export default function MenuOptimizationPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">
-                    Generated Dish Preview
+                    Generated Recipe Preview
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-bold">
-                        Mediterranean Vegetable Risotto
-                      </h2>
-                      <Badge>Dish Recipe</Badge>
-                    </div>
-                    <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                      <img
-                        src="/placeholder.svg?height=200&width=400"
-                        alt="Recipe preview"
-                        className="h-full w-full object-cover rounded-lg"
-                      />
-                    </div>
-                    {/* Ingredients and Metrics */}
-                    <div className="grid md:grid-cols-2 gap-4">
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertTitle>Error</AlertTitle>
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {recipe ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-bold">
+                          {recipe.title || "Recipe"}
+                        </h2>
+                      </div>
+
+                      {/* Ingredients */}
                       <div>
                         <h4 className="font-medium">Ingredients</h4>
                         <ul className="list-disc list-inside text-sm space-y-1">
-                          {[
-                            "2 cups Arborio rice",
-                            "1 cup chopped lettuce",
-                            "2 tomatoes, diced",
-                            "1 onion, finely chopped",
-                            "4 cups vegetable stock",
-                            "1/2 cup white wine",
-                            "2 tbsp olive oil",
-                            "1/4 cup grated Parmesan",
-                            "Salt and pepper to taste",
-                          ].map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
+                          {recipe.ingredients.length ? (
+                            recipe.ingredients.map(
+                              (item: string, i: number) => (
+                                <li key={i}>{item}</li>
+                              )
+                            )
+                          ) : (
+                            <li>⚠️ No ingredients provided.</li>
+                          )}
                         </ul>
                       </div>
-                      <div className="space-y-3">
-                        {[
-                          { label: "Profit Margin", value: 68 },
-                          { label: "Predicted Popularity", value: 85 },
-                          { label: "Sustainability Score", value: 92 },
-                          { label: "Waste Reduction", value: 75 },
-                        ].map((metric) => (
-                          <div key={metric.label}>
-                            <div className="flex items-center justify-between text-sm font-medium mb-1">
-                              <span>{metric.label}</span>
-                              <span>{metric.value}%</span>
-                            </div>
-                            <Progress value={metric.value} className="h-2" />
-                          </div>
-                        ))}
+
+                      {/* Instructions */}
+                      <div>
+                        <h4 className="font-medium">Preparation</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {recipe.instructions.length
+                            ? recipe.instructions.map(
+                                (step: string, i: number) => (
+                                  <span key={i}>
+                                    {i + 1}. {step} <br />
+                                  </span>
+                                )
+                              )
+                            : "⚠️ No instructions provided."}
+                        </p>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <Button>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add to Menu
+                        </Button>
                       </div>
                     </div>
-                    {/* Preparation Steps */}
-                    <div>
-                      <h4 className="font-medium">Preparation</h4>
-                      <p className="text-sm text-muted-foreground">
-                        1. Heat olive oil in a pan over medium heat. Add onions
-                        and cook until translucent.
-                        <br />
-                        2. Add rice and stir for 1-2 minutes until slightly
-                        toasted.
-                        <br />
-                        3. Add white wine and stir until absorbed.
-                        <br />
-                        4. Gradually add vegetable stock, one ladle at a time,
-                        stirring constantly.
-                        <br />
-                        5. When rice is almost cooked, add tomatoes and lettuce.
-                        <br />
-                        6. Remove from heat, stir in Parmesan, and season with
-                        salt and pepper.
-                        <br />
-                        7. Serve immediately, garnished with additional Parmesan
-                        if desired.
-                      </p>
-                    </div>
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
-                      <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add to Menu
-                      </Button>
-        
-                    </div>
-                  </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm">
+                      No recipe generated yet.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </CardContent>
