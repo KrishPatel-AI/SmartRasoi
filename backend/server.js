@@ -1,35 +1,36 @@
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
+const axios = require("axios");
+require("dotenv").config();
+const connectMongoDB = require("./config/mongoDB");
+
+const inventoryRoutes = require("./routes/inventoryRoutes");
+const wasteRoutes = require("./routes/wasteRoutes");
 
 const app = express();
-const PORT = 5000;
-
-// Middleware
+app.use(express.json());
 app.use(cors());
-app.use(bodyParser.json());
 
-// Root Route to Prevent "Cannot GET /" Error
-app.get("/", (req, res) => {
-  res.send("Welcome to the AI-Powered Smart Kitchen API!");
-});
+// ✅ Connect to MongoDB Atlas
+connectMongoDB();
 
-// Predict Waste Amount (Dummy Response for Now)
-app.post("/predict", async (req, res) => {
+const PORT = process.env.PORT || 8080;
+const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000"; // Flask API URL
+
+// ✅ Routes
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/waste", wasteRoutes);
+
+// ✅ Route to interact with Flask AI Model (Waste Prediction)
+app.post("/api/predict-waste", async (req, res) => {
   try {
-    const inputData = req.body;
-    console.log("Received Data:", inputData);
+    const response = await axios.post(`${FLASK_API_URL}/predict`, req.body);
 
-    // Mock Prediction (Replace with Actual Logic Later)
-    const predictedWaste = Math.random() * 100;
-
-    res.json({ predicted_waste_amount: parseFloat(predictedWaste.toFixed(2)) });
+    res.json(response.data); // Send Flask AI prediction response to frontend
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error("❌ Error connecting to Flask AI:", error.message);
+    res.status(500).json({ error: "Failed to connect to AI model." });
   }
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
