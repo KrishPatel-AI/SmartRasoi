@@ -16,13 +16,6 @@ export function Navbar() {
 
         <nav className="hidden md:flex items-center gap-6">
           <Link
-            href="/"
-            className="text-sm font-medium text-foreground hover:text-primary transition"
-          >
-            Home
-          </Link>
-
-          <Link
             href="/dashboard"
             className="text-sm font-medium text-foreground hover:text-primary transition"
           >
@@ -44,16 +37,10 @@ export function Navbar() {
           </Link>
 
           <Link
-            href="/reports_analysis"
-            className="text-sm font-medium text-foreground hover:text-primary transition"
-          >
-            Reports and Analysis
-          </Link>
-          <Link
             href="/waste_prediction"
             className="text-sm font-medium text-foreground hover:text-primary transition"
           >
-           Waste Prediction
+            Waste Prediction
           </Link>
         </nav>
 
