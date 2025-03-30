@@ -41,7 +41,6 @@ import {
 import { Label } from "@/components/ui/label";
 
 import { supabase } from "@/lib/supabase";
-import { RealtimeChannel } from '@supabase/supabase-js';
 
 function getStatusBadge(status: string) {
   switch (status) {
