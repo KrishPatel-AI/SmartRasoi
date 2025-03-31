@@ -39,7 +39,7 @@ export default function MenuOptimizationPage() {
         </TabsContent>
 
         <TabsContent value="current" className="space-y-4 mt-4">
-          {/* <CurrentMenuTab /> */}
+          <CurrentMenuTab />
         </TabsContent>
 
         <TabsContent value="generator" className="mt-4 space-y-6">

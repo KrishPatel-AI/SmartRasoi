@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,9 +20,10 @@ import {
   Edit,
   Trash,
   Filter,
+  ChefHat,
+  Leaf,
   DollarSign,
 } from "lucide-react";
-import { ChefHat, Leaf } from "lucide-react";
 
 import {
   Select,
@@ -42,7 +44,7 @@ import { Label } from "@/components/ui/label";
 
 import { supabase } from "@/lib/supabase";
 
-function getStatusBadge(status: string) {
+function getStatusBadge(status) {
   switch (status) {
     case "active":
       return (
@@ -78,13 +80,13 @@ function getStatusBadge(status: string) {
   }
 }
 
-function calculateProfitMargin(cost: number, price: number) {
+function calculateProfitMargin(cost, price) {
   if (!cost || !price || cost <= 0 || price <= 0) return 0;
   return ((price - cost) / price) * 100;
 }
 
 function getCategoryIcon(category) {
-  switch (category.toLowerCase()) {
+  switch (category?.toLowerCase()) {
     case "main":
       return <ChefHat className="h-4 w-4 mr-1" />;
     case "appetizer":
@@ -115,7 +117,7 @@ export default function CurrentMenu() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
+  const [itemToDelete, setItemToDelete] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortField, setSortField] = useState("name");
@@ -186,7 +188,7 @@ export default function CurrentMenu() {
         setError(`Failed to add menu item: ${insertError.message}`);
       } else {
         await fetchMenu();
-        setNewMenuItem({...defaultMenuItem});
+        setNewMenuItem({ ...defaultMenuItem });
         setIsAddDialogOpen(false);
       }
     } catch (err) {
@@ -264,7 +266,7 @@ export default function CurrentMenu() {
         setError(`Failed to delete menu item: ${deleteError.message}`);
       } else {
         await fetchMenu();
-        setItemToDelete(null); // Reset to null after deletion
+        setItemToDelete(null);
         setIsDeleteDialogOpen(false);
       }
     } catch (err) {
@@ -430,7 +432,7 @@ export default function CurrentMenu() {
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
-                  <TableHead className="text-right">
+                  <TableHead>
                     <Button
                       variant="ghost"
                       className="p-0 h-8"
@@ -440,7 +442,7 @@ export default function CurrentMenu() {
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
-                  <TableHead className="text-right">
+                  <TableHead>
                     <Button
                       variant="ghost"
                       className="p-0 h-8"
@@ -450,7 +452,7 @@ export default function CurrentMenu() {
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
-                  <TableHead className="text-right">
+                  <TableHead>
                     <Button
                       variant="ghost"
                       className="p-0 h-8"
@@ -467,53 +469,55 @@ export default function CurrentMenu() {
               <TableBody>
                 {filteredItems.map((item) => (
                   <TableRow key={item.id}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center">{item.name}</div>
+                    </TableCell>
+                    <TableCell className="capitalize">
+                      {item.category}
+                    </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end">
+                      <div className="flex items-center ">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                         {item.cost.toFixed(2)}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end">
+                      <div className="flex items-center ">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                         {item.price.toFixed(2)}
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell>
                       <span
-                        className={`${
+                        className={
                           item.profit_margin >= 60
                             ? "text-green-600"
                             : item.profit_margin >= 40
                             ? "text-amber-600"
                             : "text-red-600"
-                        }`}
+                        }
                       >
                         {item.profit_margin.toFixed(1)}%
                       </span>
                     </TableCell>
                     <TableCell>{getStatusBadge(item.status)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button variant="outline" size="icon" onClick={() => handleEditClick(item)}><Edit className="h-4 w-4" /></Button>
-                        <Button variant="outline" size="icon" onClick={() => handleDeleteClick(item.id)}><Trash className="h-4 w-4" /></Button>
-                        className={`${
-                          (item.profit_margin || 0) >= 60
-                            ? "text-green-600"
-                            : (item.profit_margin || 0) >= 40
-                            ? "text-amber-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {item.profit_margin != null
-                          ? item.profit_margin.toFixed(1)
-                          : "0.0"}
-                        %
-                      </span>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(item.status)}</TableCell>
                     <TableCell>
-                      <Button variant="outline" size="icon" onClick={() => handleEditClick(item)}><Edit className="h-4 w-4" /></Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleEditClick(item)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDeleteClick(item.id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -840,24 +844,25 @@ export default function CurrentMenu() {
       >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Delete Menu Item</DialogTitle>
+            <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete this menu item? This action cannot
               be undone.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="mt-4">
             <Button
               variant="outline"
               onClick={() => {
                 setIsDeleteDialogOpen(false);
+                setItemToDelete(null);
                 setError(null);
               }}
             >
               Cancel
             </Button>
             <Button variant="destructive" onClick={deleteMenuItem}>
-              Delete
+              Delete Item
             </Button>
           </DialogFooter>
         </DialogContent>

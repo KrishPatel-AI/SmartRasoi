@@ -37,10 +37,10 @@ export function Navbar() {
           </Link>
 
           <Link
-            href="/waste_prediction"
+            href="/ai_classifier"
             className="text-sm font-medium text-foreground hover:text-primary transition"
           >
-            Waste Prediction
+            AI Classifier
           </Link>
         </nav>
 
