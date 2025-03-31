@@ -22,7 +22,7 @@ export default function MenuOptimizationPage() {
       <Tabs defaultValue="current" className="w-full">
         <TabsList>
           <TabsTrigger value="current">Current Menu</TabsTrigger>
-          <TabsTrigger value="generator">Dish Generator</TabsTrigger>
+          <TabsTrigger value="generator">Recipe Generator</TabsTrigger>
         </TabsList>
 
         <TabsContent value="current" className="space-y-4 mt-4">
