@@ -6,7 +6,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins
 
 # Set your Gemini API Key
-GEN_AI_API_KEY = ""
+GEN_AI_API_KEY = "AIzaSyBZXA_dcKsH3B8fyRvpkKYaJHguzjTYPdw"
 genai.configure(api_key=GEN_AI_API_KEY)
 
 @app.route("/generate_title", methods=["POST"])
