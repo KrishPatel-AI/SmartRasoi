@@ -97,7 +97,7 @@ export default function DishGeneratorTab() {
         <CardTitle>AI Recipe Generator</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-6 lg:grid-cols-2">
-        {/* Left Panel */}
+       
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -154,7 +154,6 @@ export default function DishGeneratorTab() {
           </Card>
         </div>
 
-        {/* Right Panel - Recipe Preview */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">
@@ -177,7 +176,6 @@ export default function DishGeneratorTab() {
                   </h2>
                 </div>
 
-                {/* Ingredients */}
                 <div>
                   <h4 className="font-medium">Ingredients</h4>
                   <ul className="list-disc list-inside text-sm space-y-1">
@@ -193,7 +191,6 @@ export default function DishGeneratorTab() {
                   </ul>
                 </div>
 
-                {/* Instructions */}
                 <div>
                   <h4 className="font-medium">Preparation</h4>
                   <p className="text-sm text-muted-foreground">
@@ -209,7 +206,6 @@ export default function DishGeneratorTab() {
                   </p>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex gap-2">
                   <Button>
                     <Plus className="mr-2 h-4 w-4" />

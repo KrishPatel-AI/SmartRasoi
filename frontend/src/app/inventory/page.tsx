@@ -85,11 +85,11 @@ interface InventoryItem {
 
 const defaultItem = {
   name: "",
-  category: "vegetables", // Set a default category
+  category: "vegetables", 
   quantity: 1,
-  unit: "kg", // Set a default unit
+  unit: "kg", 
   status: "optimal",
-  amount: 0, // Add default amount
+  amount: 0, 
   expiry_date: "",
 };
 
@@ -106,7 +106,7 @@ export default function InventoryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch Inventory Items from Supabase
+  
   async function fetchInventory() {
     setIsLoading(true);
     setError(null);
@@ -130,11 +130,11 @@ export default function InventoryPage() {
     }
   }
 
-  // Add a New Item to Supabase
+  
   async function addItem() {
     setError(null);
     try {
-      // Validate required fields
+      
       if (!newItem.name) {
         setError("Item name is required");
         return;
@@ -145,18 +145,18 @@ export default function InventoryPage() {
         return;
       }
 
-      // Prepare the item data
+      
       const itemToAdd = {
         name: newItem.name,
         category: newItem.category,
         quantity: newItem.quantity,
-        amount: newItem.amount || 0, // Ensure amount has a default value
+        amount: newItem.amount || 0, 
         unit: newItem.unit || "unit",
         status: newItem.status,
         expiry_date: newItem.expiry_date ? newItem.expiry_date : null,
       };
 
-      // Insert the item into Supabase
+   
       const { error: insertError } = await supabase
         .from("inventory")
         .insert([itemToAdd]);
@@ -175,13 +175,13 @@ export default function InventoryPage() {
     }
   }
 
-  // Update an Item in Supabase
+
   async function updateItem() {
     if (!editingItem) return;
     setError(null);
 
     try {
-      // Validate required fields
+     
       if (!editingItem.name) {
         setError("Item name is required");
         return;
@@ -192,18 +192,18 @@ export default function InventoryPage() {
         return;
       }
 
-      // Prepare the item data
+      
       const itemToUpdate = {
         name: editingItem.name,
         category: editingItem.category,
         quantity: editingItem.quantity,
-        amount: editingItem.amount || 0, // Ensure amount has a default value
+        amount: editingItem.amount || 0, 
         unit: editingItem.unit || "unit",
         status: editingItem.status,
         expiry_date: editingItem.expiry_date ? editingItem.expiry_date : null,
       };
 
-      // Update the item in Supabase
+     
       const { error: updateError } = await supabase
         .from("inventory")
         .update(itemToUpdate)
@@ -223,7 +223,7 @@ export default function InventoryPage() {
     }
   }
 
-  // Delete an Item from Supabase
+  
   async function deleteItem() {
     if (!itemToDelete) return;
     setError(null);
@@ -248,7 +248,6 @@ export default function InventoryPage() {
     }
   }
 
-  // Filter items based on search query and category
   const filteredItems = inventoryItems.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -258,11 +257,10 @@ export default function InventoryPage() {
     return matchesSearch && matchesCategory;
   });
 
-  // Set up real-time subscription for inventory changes
+
   useEffect(() => {
     fetchInventory();
 
-    // Set up real-time subscription
     const channel = supabase
       .channel("inventory-changes")
       .on(
@@ -274,17 +272,17 @@ export default function InventoryPage() {
       )
       .subscribe();
 
-    // Clean up the subscription when component unmounts
+    
     return () => {
       supabase.removeChannel(channel);
     };
   }, []);
 
-  // Open Edit Dialog with selected item data
+ 
   function handleEditClick(item: InventoryItem) {
     setEditingItem({
       ...item,
-      // Convert the date format for the input field
+     
       expiry_date: item.expiry_date
         ? new Date(item.expiry_date).toISOString().split("T")[0]
         : "",
@@ -292,7 +290,6 @@ export default function InventoryPage() {
     setIsEditDialogOpen(true);
   }
 
-  // Open Delete Dialog with selected item id
   function handleDeleteClick(id: number) {
     setItemToDelete(id);
     setIsDeleteDialogOpen(true);
@@ -605,7 +602,6 @@ export default function InventoryPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Add Item Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -751,7 +747,7 @@ export default function InventoryPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Item Dialog */}
+   
       <Dialog
         open={isEditDialogOpen}
         onOpenChange={(open) => {
@@ -907,7 +903,6 @@ export default function InventoryPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog
         open={isDeleteDialogOpen}
         onOpenChange={(open) => {
