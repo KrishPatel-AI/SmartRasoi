@@ -84,11 +84,19 @@ export default function DishGeneratorTab() {
 
     return {
       title: extract(/\*\*Recipe Title:\*\*([\s\S]*?)\n/),
-      ingredients:
-        extract(/\*\*Ingredients:\*\*([\s\S]*?)\n\*\*/)?.split("\n") || [],
-      instructions:
-        extract(/\*\*Instructions:\*\*([\s\S]*?)\n\*\*/)?.split("\n") || [],
+      ingredients: cleanList(extract(/\*\*Ingredients:\*\*([\s\S]*?)\n\*\*/)),
+      instructions: cleanList(extract(/\*\*Instructions:\*\*([\s\S]*?)\n\*\*/)),
     };
+  };
+
+  // Helper function to clean list formatting
+  const cleanList = (text) => {
+    return text
+      ? text
+          .split("\n")
+          .map((item) => item.replace(/^[\*\-\d]+[\.\s]*/, "").trim())
+          .filter((item) => item.length > 0) // Remove empty items
+      : [];
   };
 
   return (
@@ -97,33 +105,22 @@ export default function DishGeneratorTab() {
         <CardTitle>AI Recipe Generator</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-6 lg:grid-cols-2">
-       
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">
-                Select Ingredients
-              </CardTitle>
+              <CardTitle className="text-base">Select Ingredients</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <ScrollArea className="h-[200px] border rounded p-2">
                 {inventory.length > 0 ? (
                   inventory.map((ingredient, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2 py-1"
-                    >
+                    <div key={index} className="flex items-center gap-2 py-1">
                       <Checkbox
                         id={ingredient}
                         checked={selectedIngredients.includes(ingredient)}
-                        onCheckedChange={() =>
-                          toggleIngredient(ingredient)
-                        }
+                        onCheckedChange={() => toggleIngredient(ingredient)}
                       />
-                      <label
-                        htmlFor={ingredient}
-                        className="cursor-pointer"
-                      >
+                      <label htmlFor={ingredient} className="cursor-pointer">
                         {ingredient.charAt(0).toUpperCase() +
                           ingredient.slice(1)}
                       </label>
@@ -180,11 +177,9 @@ export default function DishGeneratorTab() {
                   <h4 className="font-medium">Ingredients</h4>
                   <ul className="list-disc list-inside text-sm space-y-1">
                     {recipe.ingredients.length ? (
-                      recipe.ingredients.map(
-                        (item, i) => (
-                          <li key={i}>{item}</li>
-                        )
-                      )
+                      recipe.ingredients.map((item, i) => (
+                        <li key={i}>📌 {item}</li>
+                      ))
                     ) : (
                       <li>⚠️ No ingredients provided.</li>
                     )}
@@ -192,18 +187,18 @@ export default function DishGeneratorTab() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium">Preparation</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {recipe.instructions.length
-                      ? recipe.instructions.map(
-                          (step, i) => (
-                            <span key={i}>
-                              {i + 1}. {step} <br />
-                            </span>
-                          )
-                        )
-                      : "⚠️ No instructions provided."}
-                  </p>
+                  <h4 className="font-medium">Preparation Steps</h4>
+                  <ol className="list-decimal list-inside text-sm space-y-1">
+                    {recipe.instructions.length ? (
+                      recipe.instructions.map((step, i) => (
+                        <li key={i}>
+                          <strong>Step {i + 1}:</strong> {step}
+                        </li>
+                      ))
+                    ) : (
+                      <li>⚠️ No instructions provided.</li>
+                    )}
+                  </ol>
                 </div>
 
                 <div className="flex gap-2">
@@ -214,9 +209,7 @@ export default function DishGeneratorTab() {
                 </div>
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">
-                No recipe generated yet.
-              </p>
+              <p className="text-gray-500 text-sm">No recipe generated yet.</p>
             )}
           </CardContent>
         </Card>
