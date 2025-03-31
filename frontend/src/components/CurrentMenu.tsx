@@ -98,7 +98,6 @@ function getCategoryIcon(category) {
   }
 }
 
-// Define interface for menu item
 const defaultMenuItem = {
   name: "",
   category: "main",
@@ -123,7 +122,6 @@ export default function CurrentMenu() {
   const [sortField, setSortField] = useState("name");
   const [sortDirection, setSortDirection] = useState("asc");
 
-  // Fetch Menu Items from Supabase
   async function fetchMenu() {
     setIsLoading(true);
     setError(null);
@@ -147,11 +145,9 @@ export default function CurrentMenu() {
     }
   }
 
-  // Add a New Item to Supabase
   async function addMenuItem() {
     setError(null);
     try {
-      // Validate required fields
       if (!newMenuItem.name) {
         setError("Menu item name is required");
         return;
@@ -162,13 +158,11 @@ export default function CurrentMenu() {
         return;
       }
 
-      // Calculate profit margin
       const profitMargin = calculateProfitMargin(
         newMenuItem.cost,
         newMenuItem.price
       );
 
-      // Prepare the item data
       const itemToAdd = {
         name: newMenuItem.name,
         category: newMenuItem.category,
@@ -178,7 +172,6 @@ export default function CurrentMenu() {
         status: newMenuItem.status,
       };
 
-      // Insert the item into Supabase
       const { error: insertError } = await supabase
         .from("menu")
         .insert([itemToAdd]);
@@ -197,13 +190,11 @@ export default function CurrentMenu() {
     }
   }
 
-  // Update an Item in Supabase
   async function updateMenuItem() {
     if (!editingMenuItem) return;
     setError(null);
 
     try {
-      // Validate required fields
       if (!editingMenuItem.name) {
         setError("Menu item name is required");
         return;
@@ -214,13 +205,11 @@ export default function CurrentMenu() {
         return;
       }
 
-      // Calculate profit margin
       const profitMargin = calculateProfitMargin(
         editingMenuItem.cost,
         editingMenuItem.price
       );
 
-      // Prepare the item data
       const itemToUpdate = {
         name: editingMenuItem.name,
         category: editingMenuItem.category,
@@ -230,7 +219,6 @@ export default function CurrentMenu() {
         status: editingMenuItem.status,
       };
 
-      // Update the item in Supabase
       const { error: updateError } = await supabase
         .from("menu")
         .update(itemToUpdate)
@@ -250,7 +238,6 @@ export default function CurrentMenu() {
     }
   }
 
-  // Delete an Item from Supabase
   async function deleteMenuItem() {
     if (!itemToDelete) return;
     setError(null);
@@ -275,7 +262,6 @@ export default function CurrentMenu() {
     }
   }
 
-  // Toggle sort direction or change sort field
   function handleSort(field) {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -285,7 +271,6 @@ export default function CurrentMenu() {
     }
   }
 
-  // Filter items based on search query and category
   const filteredItems = menuItems.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -296,11 +281,9 @@ export default function CurrentMenu() {
     return matchesSearch && matchesCategory;
   });
 
-  // Set up real-time subscription for menu changes
   useEffect(() => {
     fetchMenu();
 
-    // Set up real-time subscription
     const channel = supabase
       .channel("menu-changes")
       .on(
@@ -312,13 +295,11 @@ export default function CurrentMenu() {
       )
       .subscribe();
 
-    // Clean up the subscription when component unmounts
     return () => {
       supabase.removeChannel(channel);
     };
   }, [sortField, sortDirection]);
 
-  // Open Edit Dialog with selected item data
   function handleEditClick(item) {
     setEditingMenuItem({
       ...item,
@@ -326,7 +307,6 @@ export default function CurrentMenu() {
     setIsEditDialogOpen(true);
   }
 
-  // Open Delete Dialog with selected item id
   function handleDeleteClick(id) {
     setItemToDelete(id);
     setIsDeleteDialogOpen(true);
@@ -527,7 +507,6 @@ export default function CurrentMenu() {
         </CardContent>
       </Card>
 
-      {/* Add Menu Item Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -632,7 +611,7 @@ export default function CurrentMenu() {
                 </SelectContent>
               </Select>
             </div>
-            {/* Show calculated profit margin preview */}
+     
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">Profit Margin</Label>
               <div className="col-span-3">
@@ -675,7 +654,6 @@ export default function CurrentMenu() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Menu Item Dialog */}
       <Dialog
         open={isEditDialogOpen}
         onOpenChange={(open) => {
@@ -790,7 +768,7 @@ export default function CurrentMenu() {
                   </SelectContent>
                 </Select>
               </div>
-              {/* Show calculated profit margin preview */}
+           
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Profit Margin</Label>
                 <div className="col-span-3">
@@ -834,7 +812,6 @@ export default function CurrentMenu() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog
         open={isDeleteDialogOpen}
         onOpenChange={(open) => {

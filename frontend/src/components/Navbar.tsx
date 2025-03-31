@@ -4,8 +4,6 @@ import Link from "next/link";
 
 import { ModeToggle } from "../components/ModeToggle";
 
-import { Button } from "../components/ui/button";
-
 export function Navbar() {
   return (
     <header className="fixed top-0 left-0 w-full bg-background border-b shadow-sm z-50">
@@ -15,13 +13,6 @@ export function Navbar() {
         </div>
 
         <nav className="hidden md:flex items-center gap-6">
-          <Link
-            href="/dashboard"
-            className="text-sm font-medium text-foreground hover:text-primary transition"
-          >
-            Dashboard
-          </Link>
-
           <Link
             href="/inventory"
             className="text-sm font-medium text-foreground hover:text-primary transition"
@@ -46,8 +37,6 @@ export function Navbar() {
 
         <div className="flex items-center gap-4">
           <ModeToggle />
-
-          <Button className="">Get Started</Button>
         </div>
       </div>
     </header>
