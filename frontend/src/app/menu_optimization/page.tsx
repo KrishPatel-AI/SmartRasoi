@@ -19,7 +19,7 @@ export default function MenuOptimizationPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="suggestions" className="w-full">
+      <Tabs defaultValue="current" className="w-full">
         <TabsList>
           <TabsTrigger value="current">Current Menu</TabsTrigger>
           <TabsTrigger value="generator">Dish Generator</TabsTrigger>
